@@ -7,8 +7,14 @@
 
 import UIKit
 
-class ViewController: UIViewController {
-        
+class
+ViewController: UIViewController {
+
+    private var timer: Timer?
+    private var animator: UIDynamicAnimator?
+    private var behavior: SquareBehavior?
+    private var squares = [UIView]()
+    
     @IBOutlet weak var board: UIView! {
         didSet {
             let tap = UITapGestureRecognizer(target: self, action: #selector(onTap(_:)))
@@ -20,41 +26,17 @@ class ViewController: UIViewController {
         }
     }
     
-    private var animator: UIDynamicAnimator?
-    private var behavior: SquareBehavior?
-    private var squares = [UIView]()
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        self.createTimerForExplode()
+    }
     
     @objc func onTap(_ sender: UITapGestureRecognizer) {
         let pointTapped = sender.location(in: board)
         createSquare(at: pointTapped)
     }
     
-    private func createSquare(at point: CGPoint) {
-        let frame = CGRect(origin: point, size: CGSize(width: 30, height: 30))
-                
-        let square = UIView(frame: frame)
-        square.backgroundColor = UIColor(
-            red: CGFloat.random(in: 0...1),
-            green: CGFloat.random(in: 0...1),
-            blue: CGFloat.random(in: 0...1),
-            alpha: 1)
-        
-        board.addSubview(square)
-        squares.append(square)
-        behavior?.addItem(square)
-    }
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-    }
-    
-    @IBAction func onSquare(_ sender: UIButton) {
-        let x = arc4random() % UInt32(board.bounds.size.width)
-        let point = CGPoint(x: Int(x), y: 0)
-        createSquare(at: point)
-    }
-    
-    @IBAction func onExplode(_ sender: UIButton) {
+    @objc func createExplode() {
         guard squares.count > 0 else { return }
         
         squares.forEach({behavior?.removeItem($0)})
@@ -73,6 +55,46 @@ class ViewController: UIViewController {
             let y = self.board.bounds.size.height
             sq.center = CGPoint(x: CGFloat(x), y: -y)
         }
+    }
+    
+    private func createTimerForExplode() {
+        if timer == nil {
+            let timer = Timer.scheduledTimer(
+                timeInterval: 10,
+                target: self,
+                selector: #selector(createExplode),
+                userInfo: nil,
+                repeats: true)
+            
+            RunLoop.current.add(timer, forMode: .common)
+            timer.tolerance = 0.1
+            self.timer = timer
+        }
+    }
+    
+    private func createSquare(at point: CGPoint) {
+        let frame = CGRect(origin: point, size: CGSize(width: 30, height: 30))
+                
+        let square = UIView(frame: frame)
+        square.backgroundColor = UIColor(
+            red: CGFloat.random(in: 0...1),
+            green: CGFloat.random(in: 0...1),
+            blue: CGFloat.random(in: 0...1),
+            alpha: 1)
+        
+        board.addSubview(square)
+        squares.append(square)
+        behavior?.addItem(square)
+    }
+    
+    @IBAction func onSquare(_ sender: UIButton) {
+        let x = arc4random() % UInt32(board.bounds.size.width)
+        let point = CGPoint(x: Int(x), y: 0)
+        createSquare(at: point)
+    }
+    
+    @IBAction func onExplode(_ sender: UIButton) {
+        createExplode()
     }
 }
 
