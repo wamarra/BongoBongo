@@ -44,6 +44,7 @@ ViewController: UIViewController {
         UIView.animate(withDuration: 1) {
             self.explodeSquares()
         } completion: { finished in
+            self.squares.forEach({self.behavior?.removeItem($0)})
             self.squares.forEach({$0.removeFromSuperview()})
             self.squares.removeAll()
         }
@@ -77,9 +78,9 @@ ViewController: UIViewController {
                 
         let square = UIView(frame: frame)
         square.backgroundColor = UIColor(
-            red: CGFloat.random(in: 0...1),
-            green: CGFloat.random(in: 0...1),
-            blue: CGFloat.random(in: 0...1),
+            red: .random(in: 0...1),
+            green: .random(in: 0...1),
+            blue: .random(in: 0...1),
             alpha: 1)
         
         board.addSubview(square)
